@@ -1,12 +1,14 @@
 package bigquery
 
 import (
+	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"strconv"
 	"time"
 
 	"gcp_learn/bigquery/crud"
+	"gcp_learn/bigquery/queries"
 )
 
 func Run() {
@@ -17,18 +19,38 @@ func Run() {
 
 	date := strconv.Itoa(year) + month.String() + strconv.Itoa(day)
 
-	err := crud.CreateTable(ctx, bqClient, date)
+	table, err := crud.CreateTable(ctx, bqClient, date)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Created table: " + date)
 
-	err = crud.DeleteTable(ctx, bqClient, date)
+	fmt.Println("Executing query ")
+
+	q := bqClient.Query(queries.SimpleGet)
+	q.Parameters = []bigquery.QueryParameter{
+		{
+			Name:  "startDate",
+			Value: time.Now().Format("20060102"),
+		},
+		{
+			Name:  "endDate",
+			Value: time.Now().AddDate(0, 0, 1).Format("20060102"),
+		},
+	}
+
+	err = crud.ExecuteQuery(ctx, q, table)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Finished executing: ")
 
-	fmt.Println("Deleted table: " + date)
+	//err = crud.DeleteTable(ctx, bqClient, date)
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//fmt.Println("Deleted table: " + date)
 
 }

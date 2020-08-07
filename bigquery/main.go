@@ -1,11 +1,12 @@
 package bigquery
 
 import (
-	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
 	"strconv"
 	"time"
+
+	"cloud.google.com/go/bigquery"
 
 	"gcp_learn/bigquery/crud"
 	"gcp_learn/bigquery/queries"

@@ -2,15 +2,24 @@ package spandb
 
 import (
 	"context"
-	"gcp_learn/spandb/crud"
+	"fmt"
 )
 
 func Run() {
 	ctx := context.Background()
 
-	dbname := "dummy"
+	projectID := "kouzoh-p-bharath"
+	instanceId := "spdbtest"
+	dbID := "test"
+	//
+	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
 
-	err := crud.CreateDatabase(ctx, dbname)
+	//err := crud.CreateDatabase(ctx, "dbname")
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	_,_,err := CreateClients(ctx,dbname)
 	if err != nil {
 		panic(err)
 	}

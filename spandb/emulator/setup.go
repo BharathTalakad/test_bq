@@ -21,7 +21,7 @@ func SetupAndRun(ctx context.Context) (err error ) {
 	}
 
 	projectID := "emu"
-	instanceId := "test-instance"
+	instanceId := "testIns"
 	dbID := "dummy"
 
 	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
@@ -69,12 +69,6 @@ func createDatabase( db string) error {
                                 LastName   STRING(1024),
                                 SingerInfo BYTES(MAX)
                         ) PRIMARY KEY (SingerId)`,
-			`CREATE TABLE Albums (
-                                SingerId     INT64 NOT NULL,
-                                AlbumId      INT64 NOT NULL,
-                                AlbumTitle   STRING(MAX)
-                        ) PRIMARY KEY (SingerId, AlbumId),
-                        INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
 		},
 	})
 	if err != nil {
@@ -142,7 +136,7 @@ func query(db string) error {
 
 	fmt.Printf("Reading now....\n")
 
-	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
+	stmt := spanner.Statement{SQL: `SELECT SingerId, FirstName FROM Singers`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
 	for {
@@ -153,11 +147,11 @@ func query(db string) error {
 		if err != nil {
 			return err
 		}
-		var singerID, albumID int64
-		var albumTitle string
-		if err := row.Columns(&singerID, &albumID, &albumTitle); err != nil {
+		var singerID int64
+		var firstName string
+		if err := row.Columns(&singerID, &firstName); err != nil {
 			return err
 		}
-		fmt.Printf("%d %d %s\n", singerID, albumID, albumTitle)
+		fmt.Printf("%d %s\n", singerID, firstName)
 	}
 }

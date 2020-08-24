@@ -4,5 +4,7 @@ run-emu-spanner:
 	export SPANNER_EMULATOR_HOST=localhost:9010
 	@docker-compose -f spandb/docker-compose-spanner.yaml up -d
 	echo "Created spanner emulator"
-#   Add command to run tests and other stuff here
+
+.PHONY : stop-emu-spanner
+stop-emu-spanner:
 	@docker-compose -f spandb/docker-compose-spanner.yaml down

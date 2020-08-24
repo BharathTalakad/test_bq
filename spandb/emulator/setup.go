@@ -12,6 +12,9 @@ import (
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+
+	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
+	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
 func SetupAndRun(ctx context.Context) (err error ) {
@@ -25,6 +28,11 @@ func SetupAndRun(ctx context.Context) (err error ) {
 	dbID := "dummy"
 
 	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
+
+	err = createInstance(projectID,instanceId)
+	if err != nil {
+		panic(err)
+	}
 
 	err = createDatabase(dbname)
 	if err != nil {
@@ -44,6 +52,40 @@ func SetupAndRun(ctx context.Context) (err error ) {
 
 	return nil
 
+}
+
+func createInstance(projectID, instanceID string) error {
+	ctx := context.Background()
+
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer instanceAdmin.Close()
+
+	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
+		Parent:     fmt.Sprintf("projects/%s", projectID),
+		InstanceId: instanceID,
+		Instance: &instancepb.Instance{
+			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+			DisplayName: instanceID,
+			NodeCount:   1,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+	}
+	// Wait for the instance creation to finish.
+	i, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("waiting for instance creation to finish failed: %v", err)
+	}
+	// The instance may not be ready to serve yet.
+	if i.State != instancepb.Instance_READY {
+		fmt.Printf( "instance state is not READY yet. Got state %v\n", i.State)
+	}
+	fmt.Printf("Created instance [%s]\n", instanceID)
+	return nil
 }
 
 func createDatabase( db string) error {

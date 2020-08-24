@@ -3,9 +3,15 @@ package spandb
 import (
 	"context"
 	"fmt"
+
+	"gcp_learn/spandb/emulator"
 )
 
 func Run() {
+	runEmu()
+}
+
+func runReal(){
 	ctx := context.Background()
 
 	projectID := "kouzoh-p-bharath"
@@ -20,6 +26,14 @@ func Run() {
 	//}
 
 	_,_,err := CreateClients(ctx,dbname)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func runEmu() {
+	ctx := context.Background()
+	err := emulator.SetupAndRun(ctx)
 	if err != nil {
 		panic(err)
 	}

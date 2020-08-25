@@ -17,7 +17,7 @@ import (
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
-func SetupAndRun(ctx context.Context) (err error ) {
+func SetupAndRun(ctx context.Context) (err error) {
 	// Check and verify firestore env is set
 	if os.Getenv("SPANNER_EMULATOR_HOST") == "" {
 		_ = os.Setenv("SPANNER_EMULATOR_HOST", "0.0.0.0:9010")
@@ -27,9 +27,9 @@ func SetupAndRun(ctx context.Context) (err error ) {
 	instanceId := "testIns"
 	dbID := "dummy"
 
-	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
+	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId, dbID)
 
-	err = createInstance(projectID,instanceId)
+	err = createInstance(projectID, instanceId)
 	if err != nil {
 		panic(err)
 	}
@@ -49,6 +49,10 @@ func SetupAndRun(ctx context.Context) (err error ) {
 		panic(err)
 	}
 
+	err = deleteInstance(projectID, instanceId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 
@@ -82,13 +86,13 @@ func createInstance(projectID, instanceID string) error {
 	}
 	// The instance may not be ready to serve yet.
 	if i.State != instancepb.Instance_READY {
-		fmt.Printf( "instance state is not READY yet. Got state %v\n", i.State)
+		fmt.Printf("instance state is not READY yet. Got state %v\n", i.State)
 	}
 	fmt.Printf("Created instance [%s]\n", instanceID)
 	return nil
 }
 
-func createDatabase( db string) error {
+func createDatabase(db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", db)
@@ -196,4 +200,23 @@ func query(db string) error {
 		}
 		fmt.Printf("%d %s\n", singerID, firstName)
 	}
+}
+
+func deleteInstance(projectID, instanceID string) error {
+	ctx := context.Background()
+
+	adminClient, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	err = adminClient.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("sucessfully deleted instance : %s ", instanceName)
+
+	return nil
 }

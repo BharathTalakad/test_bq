@@ -14,7 +14,7 @@ func CreateDatabase(ctx context.Context, _ string) error {
 	instanceId := "spdbtest"
 	dbID := "test"
 
-	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
+	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId, dbID)
 
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(dbname)
 	if matches == nil || len(matches) != 3 {
@@ -51,6 +51,6 @@ func CreateDatabase(ctx context.Context, _ string) error {
 	if _, err := op.Wait(ctx); err != nil {
 		return err
 	}
-	fmt.Printf( "Created database [%s]\n", dbname)
+	fmt.Printf("Created database [%s]\n", dbname)
 	return nil
 }

@@ -11,21 +11,21 @@ func Run() {
 	runEmu()
 }
 
-func runReal(){
+func runReal() {
 	ctx := context.Background()
 
 	projectID := "kouzoh-p-bharath"
 	instanceId := "spdbtest"
 	dbID := "test"
 	//
-	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId,dbID)
+	dbname := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceId, dbID)
 
 	//err := crud.CreateDatabase(ctx, "dbname")
 	//if err != nil {
 	//	panic(err)
 	//}
 
-	_,_,err := CreateClients(ctx,dbname)
+	_, _, err := CreateClients(ctx, dbname)
 	if err != nil {
 		panic(err)
 	}
